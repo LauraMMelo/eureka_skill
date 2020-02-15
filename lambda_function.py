@@ -6,7 +6,7 @@ import calendar
 from datetime import datetime
 from pytz import timezone
 from ask_sdk_s3.adapter import S3Adapter
-s3_adapter = S3Adapter(bucket_name=os.environ["S3_PERSISTENCE_BUCKET"])
+# s3_adapter = S3Adapter(bucket_name=os.environ["S3_PERSISTENCE_BUCKET"])
 
 from ask_sdk_core.skill_builder import CustomSkillBuilder
 from ask_sdk_core.dispatch_components import AbstractRequestHandler
@@ -16,8 +16,7 @@ from ask_sdk_core.api_client import DefaultApiClient
 
 from ask_sdk_model import Response
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+# import config
 
 
 class LaunchRequestHandler(AbstractRequestHandler):
@@ -29,115 +28,63 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "Olá! Sou a skill do sas. Quando você nasceu?"
-        reprompt_text = "Eu nasci dia 14 de agosto de 2000 e você?"
+
+        speak_output = '''<speak>
+        <audio src="soundbank://soundlibrary/aircrafts/futuristic/futuristic_02"/>
+        Olá Bedê! Tatá aqui de novo! Verifiquei no Eureka que você está no nível 1 e é um investigador de porão e possui 300 moedas.
+        <audio src="soundbank://soundlibrary/cloth_leather_paper/money_coins/money_coins_02"/>
+        Vimos que podemos praticar mais no mundo da Matemática. Que acha de continuarmos aquela missão?
+        </speak>'''
+
+        # question = "Que acha de continuarmos aquela missão?"
+
+        # speak_output = "Olá! Bem vindo ao Eureka!"
+        # reprompt_text = "Eu sou Tatá!"
 
         return (
             handler_input.response_builder
                 .speak(speak_output)
-                .ask(reprompt_text)
+                # .ask(question)
                 .response
         )
 
-class HasBirthdayLaunchRequestHandler(AbstractRequestHandler):
-    """Handler for launch after they have set their birthday"""
 
-    def can_handle(self, handler_input):
-        # extract persistent attributes and check if they are all present
-        attr = handler_input.attributes_manager.persistent_attributes
-        attributes_are_present = ("year" in attr and "month" in attr and "day" in attr)
-
-        return attributes_are_present and ask_utils.is_request_type("LaunchRequest")(handler_input)
-
-    def handle(self, handler_input):
-        attr = handler_input.attributes_manager.persistent_attributes
-        year = int(attr['year'])
-        month = attr['month'] # month is a string, and we need to convert it to a month index later
-        day = int(attr['day'])
-
-        # get device id
-        sys_object = handler_input.request_envelope.context.system
-        device_id = sys_object.device.device_id
-
-        # get Alexa Settings API information
-        api_endpoint = sys_object.api_endpoint
-        api_access_token = sys_object.api_access_token
-
-        # construct systems api timezone url
-        url = '{api_endpoint}/v2/devices/{device_id}/settings/System.timeZone'.format(api_endpoint=api_endpoint, device_id=device_id)
-        headers = {'Authorization': 'Bearer ' + api_access_token}
-
-        userTimeZone = ""
-        try:
-	        r = requests.get(url, headers=headers)
-	        res = r.json()
-	        logger.info("Device API result: {}".format(str(res)))
-	        userTimeZone = res
-        except Exception:
-	        handler_input.response_builder.speak("Ocorreu um problema ao conectar ao serviço")
-	        return handler_input.response_builder.response
-
-        # getting the current date with the time
-        now_time = datetime.now(timezone(userTimeZone))
-
-        # Removing the time from the date because it affects our difference calculation
-        now_date = datetime(now_time.year, now_time.month, now_time.day)
-        current_year = now_time.year
-
-        # getting the next birthday
-        month_as_index = list(calendar.month_abbr).index(month[:3])
-        next_birthday = datetime(current_year, month_as_index, day)
-
-        # check if we need to adjust bday by one year
-        if now_date > next_birthday:
-            next_birthday = datetime(
-                current_year + 1,
-                month_as_index,
-                day
-            )
-            current_year += 1
-        # setting the default speak_output to Happy xth Birthday!!
-        # alexa will automatically correct the ordinal for you.
-        # no need to worry about when to use st, th, rd
-        speak_output = "Feliz aniversário de {} anos".format(str(current_year - year))
-        if now_date != next_birthday:
-            diff_days = abs((now_date - next_birthday).days)
-            speak_output = "Bem vindo de volta. Parece que faltam \
-                            {days} dias até seu aniversário de  {birthday_num}\
-                            anos".format(
-                                days=diff_days,
-                                birthday_num=(current_year-year)
-                            )
-
-        handler_input.response_builder.speak(speak_output)
-
-        return handler_input.response_builder.response
-
-class CaptureBirthdayIntentHandler(AbstractRequestHandler):
-    """Handler for Hello World Intent."""
+class EnigmasIntentHandler(AbstractRequestHandler):
+    """Handler for Questao Intent."""
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
-        return ask_utils.is_intent_name("CaptureBirthdayIntent")(handler_input)
+        return ask_utils.is_intent_name("resolver_enigmas")(handler_input)
 
-    def handle(self, handler_input):
-        # type: (HandlerInput) -> Response
-        slots = handler_input.request_envelope.request.intent.slots
-        year = slots["year"].value
-        month = slots["month"].value
-        day = slots["day"].value
+    def handle(self, handler_input):       
 
-        attributes_manager = handler_input.attributes_manager
+        speak_output = '''<speak>
+        Se prepare que vamos agora entrar no mundo da matemática.
+        <audio src="soundbank://soundlibrary/aircrafts/futuristic/futuristic_02"/>
+        Entrando na missão da Divisibilidade. Prepare-se para desvendar os enigmas que aparecerão nesta missão. 
+        Você quer revisar o conteúdo da missão?
+        </speak>'''
 
-        birthday_attributes = {
-            "year": year,
-            "month": month,
-            "day": day
-        }
+        return (
+            handler_input.response_builder
+                .speak(speak_output)
+                # .ask("add a reprompt if you want to keep the session open for the user to respond")
+                .response
+        )
 
-        attributes_manager.persistent_attributes = birthday_attributes
-        attributes_manager.save_persistent_attributes()
+class EnigmasIntentHandler(AbstractRequestHandler):
+    """Handler for Questao Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("resolver_enigmas")(handler_input)
 
-        speak_output = 'Obrigado, vou lembrar que nasceu dia {day} de {month} de {year}.'.format(month=month, day=day, year=year)
+    def handle(self, handler_input):       
+
+        speak_output = '''<speak>
+        Se prepare que vamos agora entrar no mundo da matemática.
+        <audio src="soundbank://soundlibrary/aircrafts/futuristic/futuristic_02"/>
+        Entrando na missão da Divisibilidade. Prepare-se para desvendar os enigmas que aparecerão nesta missão. 
+        Você quer revisar o conteúdo da missão?
+        </speak>'''
 
         return (
             handler_input.response_builder
@@ -247,11 +194,11 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
 # defined are included below. The order matters - they're processed top to bottom.
 
 
-sb = CustomSkillBuilder(persistence_adapter=s3_adapter, api_client=DefaultApiClient())
+sb = CustomSkillBuilder(api_client=DefaultApiClient())
 
-sb.add_request_handler(HasBirthdayLaunchRequestHandler())
+# sb.add_request_handler(HasBirthdayLaunchRequestHandler())
 sb.add_request_handler(LaunchRequestHandler())
-sb.add_request_handler(CaptureBirthdayIntentHandler())
+sb.add_request_handler(EnigmasIntentHandler())
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(CancelOrStopIntentHandler())
 sb.add_request_handler(SessionEndedRequestHandler())
