@@ -16,8 +16,12 @@ from ask_sdk_core.api_client import DefaultApiClient
 
 from ask_sdk_model import Response
 
-# import config
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
+import config
+
+contagem_acertos = 2
 
 class LaunchRequestHandler(AbstractRequestHandler):
     """Handler for Skill Launch."""
@@ -30,13 +34,13 @@ class LaunchRequestHandler(AbstractRequestHandler):
         # type: (HandlerInput) -> Response
 
         speak_output = '''<speak>
-        <audio src="soundbank://soundlibrary/aircrafts/futuristic/futuristic_02"/>
+        <audio src="https://alexathon-group7.s3-sa-east-1.amazonaws.com/eureka_convertido_12s.mp3"/>
         Olá Bedê! Tatá aqui de novo! Verifiquei no Eureka que você está no nível 1 e é um investigador de porão e possui 300 moedas.
         <audio src="soundbank://soundlibrary/cloth_leather_paper/money_coins/money_coins_02"/>
         Vimos que podemos praticar mais no mundo da Matemática. Que acha de continuarmos aquela missão?
         </speak>'''
 
-        # question = "Que acha de continuarmos aquela missão?"
+        question = "Que acha de continuarmos aquela missão?"
 
         # speak_output = "Olá! Bem vindo ao Eureka!"
         # reprompt_text = "Eu sou Tatá!"
@@ -44,55 +48,169 @@ class LaunchRequestHandler(AbstractRequestHandler):
         return (
             handler_input.response_builder
                 .speak(speak_output)
+                .ask(question)
+                .response
+        )
+
+
+class EnigmasIntentHandler(AbstractRequestHandler):
+    """Handler for Enigmas Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("resolver_enigmas")(handler_input)
+
+    def handle(self, handler_input):       
+
+        speak_output = '''<speak>
+        Se prepare que vamos agora entrar no mundo da matemática.
+        <audio src="https://alexathon-group7.s3-sa-east-1.amazonaws.com/eureka_convertido_5s.mp3"/>
+        Entrando na missão da Divisibilidade. Prepare-se para desvendar os enigmas que aparecerão nesta missão. 
+        Você quer revisar o conteúdo da missão?
+        </speak>'''
+
+        question = "Você quer revisar o conteúdo da missão?"
+
+        return (
+            handler_input.response_builder
+                .speak(speak_output)
+                .ask(question)
+                .response
+        )
+
+class PegarEnigmaUmIntentHandler(AbstractRequestHandler):
+    """Handler for pegar enigma um Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("pegar_enigma_um")(handler_input)
+
+    def handle(self, handler_input):       
+
+        speak_output = '''<speak>
+        Então vamos lá…
+        <audio src="soundbank://soundlibrary/aircrafts/futuristic/futuristic_02"/>
+        Vamos resolver um enigma! ''' +  config.questions['questao1'] + '''</speak>'''
+
+        return (
+            handler_input.response_builder
+                .speak(speak_output)
+                .ask(config.questions['questao1'])
+                .response
+        )
+
+class PegarEnigmaDoisIntentHandler(AbstractRequestHandler):
+    """Handler for pegar enigma Dois Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("pegar_enigma_dois")(handler_input)
+
+    def handle(self, handler_input):      
+
+        speak_output = '''<speak>
+        <audio src="https://alexathon-group7.s3-sa-east-1.amazonaws.com/success_conv.mp3"/>
+        <emphasis level="strong">Uau! </emphasis>
+        você acertou!
+        <break time="1s"/>
+        <audio src="soundbank://soundlibrary/aircrafts/futuristic/futuristic_02"/>
+        Vamos fazer o 2º enigma! ''' +  config.questions['questao2'] + '''</speak>'''
+
+        return (
+            handler_input.response_builder
+                .speak(speak_output)
+                .ask(config.questions['questao2'])
+                .response
+        )
+
+class PegarEnigmaTresErradoIntentHandler(AbstractRequestHandler):
+    """Handler for pegar enigma Tres Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("pegar_enigma_tres_errado")(handler_input)
+
+    def handle(self, handler_input):  
+
+        speak_output = '''<speak>
+        <audio src="https://alexathon-group7.s3-sa-east-1.amazonaws.com/wrong_conv.mp3"/>
+        <emphasis level="reduced">Ops, não foi dessa vez. </emphasis>
+        Na próxima vamos conseguir!
+        <audio src="soundbank://soundlibrary/aircrafts/futuristic/futuristic_02"/>
+        Vamos fazer o 3º enigma! ''' +  config.questions['questao3'] + '''</speak>'''
+
+        return (
+            handler_input.response_builder
+                .speak(speak_output)
+                .ask(config.questions['questao3'])
+                .response
+        )
+
+
+class PegarEnigmaTresCertoIntentHandler(AbstractRequestHandler):
+    """Handler for pegar enigma Tres Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("pegar_enigma_tres_certo")(handler_input)
+
+    def handle(self, handler_input):   
+
+        global contagem_acertos
+        contagem_acertos = 3  
+
+        speak_output = '''<speak>
+        <audio src="https://alexathon-group7.s3-sa-east-1.amazonaws.com/success_conv.mp3"/>
+        <emphasis level="strong">Uau! </emphasis>
+        você acertou!
+        <break time="1s"/>
+        <audio src="soundbank://soundlibrary/aircrafts/futuristic/futuristic_02"/>
+        Vamos fazer o 3º enigma! ''' +  config.questions['questao3'] + '''</speak>'''
+
+        return (
+            handler_input.response_builder
+                .speak(speak_output)
+                .ask(config.questions['questao3'])
+                .response
+        )
+
+class FinalIntentHandler(AbstractRequestHandler):
+    """Handler final Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("final_intent")(handler_input)
+
+    def handle(self, handler_input):       
+
+        speak_output = '''<speak>
+        <audio src="https://alexathon-group7.s3-sa-east-1.amazonaws.com/success_conv.mp3"/>
+        Parabéns! Você acertou.         
+        <break time="1s"/>
+        Todos os enigmas acabaram. Quer saber como você foi hoje?</speak>'''
+
+        question = "Quer saber como você foi hoje?"
+
+        return (
+            handler_input.response_builder
+                .speak(speak_output)
+                .ask(question)
+                .response
+        )
+
+class ResultadoIntentHandler(AbstractRequestHandler):
+    """Handler final Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("resultado_intent")(handler_input)
+
+    def handle(self, handler_input):   
+
+        global contagem_acertos
+        contagem_acertos = 2  
+
+        speak_output = '''<speak> Parabéns! Nesta missão, você desvendou <say-as interpret-as="digits">''' + str(contagem_acertos) + '''</say-as> enigmas. Por hoje é só! Até amanhã!</speak>'''
+
+        return (
+            handler_input.response_builder
+                .speak(speak_output)
                 # .ask(question)
                 .response
         )
-
-
-class EnigmasIntentHandler(AbstractRequestHandler):
-    """Handler for Questao Intent."""
-    def can_handle(self, handler_input):
-        # type: (HandlerInput) -> bool
-        return ask_utils.is_intent_name("resolver_enigmas")(handler_input)
-
-    def handle(self, handler_input):       
-
-        speak_output = '''<speak>
-        Se prepare que vamos agora entrar no mundo da matemática.
-        <audio src="soundbank://soundlibrary/aircrafts/futuristic/futuristic_02"/>
-        Entrando na missão da Divisibilidade. Prepare-se para desvendar os enigmas que aparecerão nesta missão. 
-        Você quer revisar o conteúdo da missão?
-        </speak>'''
-
-        return (
-            handler_input.response_builder
-                .speak(speak_output)
-                # .ask("add a reprompt if you want to keep the session open for the user to respond")
-                .response
-        )
-
-class EnigmasIntentHandler(AbstractRequestHandler):
-    """Handler for Questao Intent."""
-    def can_handle(self, handler_input):
-        # type: (HandlerInput) -> bool
-        return ask_utils.is_intent_name("resolver_enigmas")(handler_input)
-
-    def handle(self, handler_input):       
-
-        speak_output = '''<speak>
-        Se prepare que vamos agora entrar no mundo da matemática.
-        <audio src="soundbank://soundlibrary/aircrafts/futuristic/futuristic_02"/>
-        Entrando na missão da Divisibilidade. Prepare-se para desvendar os enigmas que aparecerão nesta missão. 
-        Você quer revisar o conteúdo da missão?
-        </speak>'''
-
-        return (
-            handler_input.response_builder
-                .speak(speak_output)
-                # .ask("add a reprompt if you want to keep the session open for the user to respond")
-                .response
-        )
-
 
 class HelpIntentHandler(AbstractRequestHandler):
     """Handler for Help Intent."""
@@ -199,6 +317,15 @@ sb = CustomSkillBuilder(api_client=DefaultApiClient())
 # sb.add_request_handler(HasBirthdayLaunchRequestHandler())
 sb.add_request_handler(LaunchRequestHandler())
 sb.add_request_handler(EnigmasIntentHandler())
+sb.add_request_handler(PegarEnigmaUmIntentHandler())
+sb.add_request_handler(PegarEnigmaDoisIntentHandler())
+
+sb.add_request_handler(PegarEnigmaTresErradoIntentHandler())
+sb.add_request_handler(PegarEnigmaTresCertoIntentHandler())
+
+sb.add_request_handler(FinalIntentHandler())
+sb.add_request_handler(ResultadoIntentHandler())
+
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(CancelOrStopIntentHandler())
 sb.add_request_handler(SessionEndedRequestHandler())
