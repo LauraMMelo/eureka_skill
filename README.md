@@ -1,1 +1,2 @@
-# Grupo 7 Alexathon
+# Eureka para Alexa  
+Alexa skill desenvolvida durante o Alexathon ocorrido em Fortaleza, no SAS
